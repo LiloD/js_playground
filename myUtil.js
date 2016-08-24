@@ -1,6 +1,10 @@
 // 'use strict';
 
+var scopes = [];
+var currentScope = null;
+
 function scope(){
+    //analysis args
     var args = Array.prototype.slice.apply(arguments);
     if(args.length < 1){
         console.log('Nothing to run');
@@ -21,16 +25,25 @@ function scope(){
         return;
     }
 
-    var context = {
-        tasks: 'tasks?'
-    
-    }
-    func.apply(context);
+    //create scope
+    var scope = {
+        tasks: []
+    };
 
+    currentScope = scope;
+    scopes.push(scope);
+    func.apply(null);
+
+    for (var i = 0; i < scope.tasks.length; i++) {
+        var task = scope.tasks[i];
+        console.log('run:', task.description);
+        task.apply(null, task.dependencies);
+        console.log('-------------\n');
+    }
+    currentScope = null;
 }
 
 function run(){
-    console.log('tasks: ', this.tasks);
     var args = Array.prototype.slice.apply(arguments);
 
     if(args.length < 2){
@@ -42,21 +55,65 @@ function run(){
     var dependencies = args.slice(1, args.length - 1);
     var func = args[args.length - 1];
 
-    console.log('run:' + description);
-    console.log('----------');
-    func.apply(null, dependencies);
-    console.log('----------\n');
+    if(!currentScope){
+        console.error('can\'t run outside of scope');
+        return;
+    }
+
+    func.type = 'run';
+    func.description = description;
+    func.dependencies = dependencies;
+
+    if(currentScope.tasks.length === 0){
+        currentScope.tasks.push(func);
+    }else{
+        var last = currentScope.tasks[currentScope.tasks.length - 1];
+        if(last.type === 'run'){
+            currentScope.tasks.push(func);
+        }
+    }
 }
 
 function xrun(){
     return;
 }
 
-function frun(){}
+function frun(){
+    var args = Array.prototype.slice.apply(arguments);
+
+    if(args.length < 2){
+        console.error('No description or No function to run');
+        return;
+    }
+
+    var description = args[0];
+    var dependencies = args.slice(1, args.length - 1);
+    var func = args[args.length - 1];
+
+    if(!currentScope){
+        console.error('can\'t run outside of scope');
+        return;
+    }
+
+    func.type = 'frun';
+    func.description = description;
+    func.dependencies = dependencies;
+
+    if(currentScope.tasks.length === 0){
+        currentScope.tasks.push(func);
+    }else{
+        var last = currentScope.tasks[currentScope.tasks.length - 1];
+        if(last.type === 'run'){
+            currentScope.tasks = [];        //empty tasks
+        }
+        currentScope.tasks.push(func);
+    }
+}
 
 module.exports = {
     run: run,
     xrun: xrun,
+    frun: frun,
     scope: scope
 };
 

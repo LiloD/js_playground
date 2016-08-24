@@ -1,13 +1,42 @@
 var util = require('./myUtil');
 var run = util.run;
-var xrun = util.run;
+var xrun = util.xrun;
+var frun = util.frun;
 var scope = util.scope;
 
+
 scope('test', function(){
-    run('test', function(){
-        console.log('hello');
+    frun('test run 1', function(){
+        console.log('hello world');
+    });
+
+    run('test run 2', function(){
+        var obj = {
+            msg: 'vivi'
+        };
+        console.log(obj.msg);
+    });
+
+    xrun('test run 3', function(){
+        var obj = {
+            msg: 'albert'
+        };
+        console.log(obj.msg);
+    });
+
+    frun('focus run 4', function(){
+        var obj = {
+            msg: 'need to focus'
+        };
+        console.log(obj.msg);
     });
 });
+
+// scope('test', function(){
+//     run('test', function(){
+//         console.log('hello');
+//     });
+// });
 
 
 // xrun('run in isolated scope', function(){
