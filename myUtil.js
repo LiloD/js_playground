@@ -1,7 +1,20 @@
-// 'use strict';
+'use strict';
 
 var scopes = [];
 var currentScope = null;
+//how we wanna use 
+
+function exceptionEnhenced(func){
+    return function(){
+        var that = this;
+        var args = Array.prototype.slice.apply(arguments);
+        try {
+            func.apply(that, args);
+        }catch(e){
+            console.log(e);
+        }
+    }
+}
 
 function scope(){
     //analysis args
@@ -27,7 +40,8 @@ function scope(){
 
     //create scope
     var scope = {
-        tasks: []
+        tasks: [],
+        isFocus: false
     };
 
     currentScope = scope;
@@ -43,8 +57,10 @@ function scope(){
     currentScope = null;
 }
 
-function run(){
-    var args = Array.prototype.slice.apply(arguments);
+
+
+function processArgs(argVal, type){
+    var args = Array.prototype.slice.apply(argVal);
 
     if(args.length < 2){
         console.error('No description or No function to run');
@@ -60,17 +76,21 @@ function run(){
         return;
     }
 
-    func.type = 'run';
+    func = exceptionEnhenced(func);
+    func.type = type;
     func.description = description;
     func.dependencies = dependencies;
+    return func;
+}
 
-    if(currentScope.tasks.length === 0){
-        currentScope.tasks.push(func);
-    }else{
-        var last = currentScope.tasks[currentScope.tasks.length - 1];
-        if(last.type === 'run'){
-            currentScope.tasks.push(func);
-        }
+function run(){
+    var func = processArgs(arguments, 'run');
+    if(!func){
+        return;
+    }
+
+    if(!currentScope.isFocus){
+        currentScope.tasks.push(func);        
     }
 }
 
@@ -78,42 +98,26 @@ function xrun(){
     return;
 }
 
+
 function frun(){
-    var args = Array.prototype.slice.apply(arguments);
-
-    if(args.length < 2){
-        console.error('No description or No function to run');
+    var func = processArgs(arguments, 'frun');
+    if(!func){
         return;
     }
 
-    var description = args[0];
-    var dependencies = args.slice(1, args.length - 1);
-    var func = args[args.length - 1];
-
-    if(!currentScope){
-        console.error('can\'t run outside of scope');
-        return;
+    if(!currentScope.isFocus){
+        currentScope.tasks = [];    //empty the normal run
+        currentScope.isFocus = true;
     }
 
-    func.type = 'frun';
-    func.description = description;
-    func.dependencies = dependencies;
-
-    if(currentScope.tasks.length === 0){
-        currentScope.tasks.push(func);
-    }else{
-        var last = currentScope.tasks[currentScope.tasks.length - 1];
-        if(last.type === 'run'){
-            currentScope.tasks = [];        //empty tasks
-        }
-        currentScope.tasks.push(func);
-    }
+    currentScope.tasks.push(func);
 }
 
 module.exports = {
     run: run,
     xrun: xrun,
     frun: frun,
-    scope: scope
+    scope: scope,
+    exceptionEnhenced: exceptionEnhenced
 };
 

@@ -5,32 +5,50 @@ var frun = util.frun;
 var scope = util.scope;
 
 
-scope('test', function(){
-    frun('test run 1', function(){
-        console.log('hello world');
+scope('try something with exception', function(){
+    run('doing something wrong', function(){
+        undefinedObj.doSomething();
+    }); 
+    
+    run('throw some error', function(){
+        var e = new Error();
+        e.message = 'some error';
+        throw e;
     });
 
-    run('test run 2', function(){
-        var obj = {
-            msg: 'vivi'
-        };
-        console.log(obj.msg);
-    });
-
-    xrun('test run 3', function(){
-        var obj = {
-            msg: 'albert'
-        };
-        console.log(obj.msg);
-    });
-
-    frun('focus run 4', function(){
-        var obj = {
-            msg: 'need to focus'
-        };
-        console.log(obj.msg);
+    run('this is a normal test', function(){
+        var a = 1;
+        var b = 10;
+        console.log(a+b);
     });
 });
+
+// scope('test', function(){
+//     frun('test run 1', function(){
+//         console.log('hello world');
+//     });
+
+//     run('test run 2', function(){
+//         var obj = {
+//             msg: 'vivi'
+//         };
+//         console.log(obj.msg);
+//     });
+
+//     xrun('test run 3', function(){
+//         var obj = {
+//             msg: 'albert'
+//         };
+//         console.log(obj.msg);
+//     });
+
+//     frun('focus run 4', function(){
+//         var obj = {
+//             msg: 'need to focus'
+//         };
+//         console.log(obj.msg);
+//     });
+// });
 
 // scope('test', function(){
 //     run('test', function(){
