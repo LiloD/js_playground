@@ -2,7 +2,6 @@
 
 var scopes = [];
 var currentScope = null;
-//how we wanna use 
 
 function exceptionEnhenced(func){
     return function(){
@@ -16,6 +15,10 @@ function exceptionEnhenced(func){
     }
 }
 
+function xscope(){
+    return;
+}
+
 function scope(){
     //analysis args
     var args = Array.prototype.slice.apply(arguments);
@@ -24,12 +27,14 @@ function scope(){
         return;
     }
     var func;
+    var scopeDescription;
     var firstArg = args[0];
     if(typeof firstArg === 'string'){
         if(args.length < 2){
             console.log('Nothing to run');
             return;
         }
+        scopeDescription = args[0];
         func = args[1];
     }else if(typeof firstArg === 'function'){
         func = args[0];
@@ -50,14 +55,14 @@ function scope(){
 
     for (var i = 0; i < scope.tasks.length; i++) {
         var task = scope.tasks[i];
-        console.log('run:', task.description);
+        console.log((i+1) + '.' + scopeDescription + ':' + task.description);
         task.apply(null, task.dependencies);
-        console.log('-------------\n');
+        if(i !== scope.tasks.length - 1){
+            console.log('\n');
+        }
     }
     currentScope = null;
 }
-
-
 
 function processArgs(argVal, type){
     var args = Array.prototype.slice.apply(argVal);
@@ -118,6 +123,7 @@ module.exports = {
     xrun: xrun,
     frun: frun,
     scope: scope,
+    xscope: xscope,
     exceptionEnhenced: exceptionEnhenced
 };
 
